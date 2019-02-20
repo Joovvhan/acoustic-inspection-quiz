@@ -1,1 +1,1 @@
-"# acoustic-inspection-quiz" 
+# Building simple quiz program with PyQt
