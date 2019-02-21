@@ -2,6 +2,10 @@ import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QGroupBox, QDialog, QVBoxLayout, QGridLayout, QLabel
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import pyqtSlot
+import random
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
  
 class App(QDialog):
  
@@ -12,7 +16,21 @@ class App(QDialog):
         self.top = 0
         self.width = 1920
         self.height = 1020
+        
+        self.figure = Figure()
+        self.figure.tight_layout()
+        self.canvas = FigureCanvas(self.figure)
+        #self.toolbar = NavigationToolbar(self.canvas, self)
+        
+        data = [random.random() for i in range(10)]
+        ax = self.figure.add_subplot(111, figsize=(15,15))
+        ax.clear()
+        ax.plot(data, '*-')
+        self.canvas.draw()
+        
         self.initUI()
+        
+        
          
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -39,7 +57,13 @@ class App(QDialog):
          
         for i in range(1, 5):
             for j in range(1, 5):
-                layout.addWidget(QPushButton('{:d}'.format(4*(j-1)+i)),i,j)
+                
+                if j == 1:
+                    plotObject = self.canvas
+                    plotObject.resize(200, 100)
+                    layout.addWidget(plotObject,i,j)
+                
+                else: layout.addWidget(QPushButton('{:d}'.format(4*(j-1)+i)),i,j)
 
          
         self.horizontalGroupBox.setLayout(layout)
