@@ -1,2 +1,3 @@
 class params:
-	data_dir = '../data'
+    data_dir = '../data'
+    
