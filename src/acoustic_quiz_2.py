@@ -45,15 +45,24 @@ class WavCanvas(FigureCanvas):
 		FigureCanvas.updateGeometry(self)
 
 	def compute_initial_figure(self):
-		t = arange(0, len(self.data)/self.fs, 1/self.fs)
+		# t = arange(0, len(self.data)/self.fs, 1/self.fs)
 		# self.axes.plot(t, self.data)
-		self.axes.plot(t, self.data)
+
+		new_fs = self.fs/20
+		new_data = librosa.core.resample(self.data, self.fs, new_fs)
+		t = arange(0, len(new_data)/new_fs, 1/new_fs)
+		self.axes.plot(t, new_data)
+
 		self.axes.axis('off')
 		# self.axes.axes.margins(tight=True)
 
 	def redraw_figure(self, color):
-		t = arange(0, len(self.data)/self.fs, 1/self.fs)
-		self.axes.plot(t, self.data, color)
+		new_fs = self.fs/20
+		new_data = librosa.core.resample(self.data, self.fs, new_fs)
+		t = arange(0, len(new_data)/new_fs, 1/new_fs)
+		self.axes.plot(t, new_data, color)
+		# t = arange(0, len(self.data)/self.fs, 1/self.fs)
+		# self.axes.plot(t, self.data, color)
 		self.axes.axis('off')
 		self.draw()
 
@@ -73,7 +82,10 @@ class WavCanvas(FigureCanvas):
 		self.data = y
 
 	def play_wav(self):
-		playsound(self.data_path)
+		try:
+			playsound(self.data_path)
+		except:
+			print("Error in play_sound thread")
 		self.axes.cla()
 		self.redraw_figure('tab:blue')
 
@@ -114,6 +126,15 @@ class SpectrogramCanvas(FigureCanvas):
 	def play_wav(self):
 		playsound(self.data_path)
 
+####
+
+class Second(QtWidgets.QMainWindow):
+	def __init__(self, parent=None):
+		super(Second, self).__init__(parent)
+		self.progress = QtGui.QProgressBar(self)
+		self.progress.setGeometry(200, 80, 250, 20)
+####
+
 class ApplicationWindow(QtWidgets.QMainWindow):
 	def __init__(self):
 		QtWidgets.QMainWindow.__init__(self)
@@ -134,6 +155,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 		self.help_menu.addAction('&About', self.about)
 
 		self.main_widget = QtWidgets.QWidget(self)
+		self.setFixedSize(1600, 900)
 
 		self.wav_file_list = glob(os.path.join(params.data_dir, '*.wav')) 
 		# print(self.wav_file_list)
@@ -176,8 +198,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 		self.layout.setColumnStretch(4, 1)
 		self.layout.setColumnStretch(5, 3)
 		self.layout.setColumnStretch(6, 1)
-		self.layout.setColumnStretch(7, 3)
-		self.layout.setColumnStretch(8, 1)
 
 		self.layout.setRowStretch(0, 1)
 		self.layout.setRowStretch(1, 1)
@@ -187,8 +207,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 		self.layout.setRowStretch(5, 1)
 		self.layout.setRowStretch(6, 3)
 		self.layout.setRowStretch(7, 1)
-		self.layout.setRowStretch(8, 3)
-		self.layout.setRowStretch(9, 1)
 
 	def setDefaultLayout(self):
 		self.layout.setColumnStretch(0, 1)
@@ -210,13 +228,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 		for i in range(16):
 			self.plot_list.append(WavCanvas(self.wav_file_list[i], self.main_widget, width=5, height=4, dpi=100))
 
-		for i in range(1, 5):
-			for j in range(1, 5):			
-				self.layout.addWidget(self.plot_list[4*(i-1)+j-1], 2*i, 2*j-1)
+		for i in range(1, 4):
+			for j in range(1, 4):			
+				self.layout.addWidget(self.plot_list[3*(i-1)+j-1], 2*i, 2*j-1)
 
-		for i in range(1, 5):
-			for j in range(1, 5):			
-				self.layout.addWidget(self.title_list[4*(i-1)+j-1], 2*i-1, 2*j-1)
+		for i in range(1, 4):
+			for j in range(1, 4):			
+				self.layout.addWidget(self.title_list[3*(i-1)+j-1], 2*i-1, 2*j-1)
 
 
 	def setQuizLayout(self):
@@ -226,13 +244,13 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 		for i in range(16):
 			self.img_list.append(SpectrogramCanvas(self.wav_file_list[i], self.main_widget, width=5, height=4, dpi=100))
 
-		for i in range(1, 5):
-			for j in range(1, 5):			
-				self.layout.addWidget(self.img_list[4*(i-1)+j-1], 2*i, 2*j-1)
+		for i in range(1, 4):
+			for j in range(1, 4):			
+				self.layout.addWidget(self.img_list[3*(i-1)+j-1], 2*i, 2*j-1)
 
-		for i in range(1, 5):
-			for j in range(1, 5):			
-				self.layout.addWidget(self.title_list[4*(i-1)+j-1], 2*i-1, 2*j-1)
+		for i in range(1, 4):
+			for j in range(1, 4):			
+				self.layout.addWidget(self.title_list[3*(i-1)+j-1], 2*i-1, 2*j-1)
 
 
 	def fileQuit(self):
@@ -263,6 +281,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 		if event.key() == QtCore.Qt.Key_O:
 			QtWidgets.QWidget().setLayout(self.layout)
 			self.layout = QtWidgets.QGridLayout(self.main_widget)
+			self.dialog = Second(self)
+			self.dialog.show()
 	
 
 qApp = QtWidgets.QApplication(sys.argv)
